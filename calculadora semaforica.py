@@ -177,19 +177,42 @@ if st.button("Calcular Tempos Verdes"):
 st.divider()
 st.header("📤 Exportar Resultados")
 
-if st.button("Exportar para Excel (CSV)"):
-    export_data = {
-        "Data": [datetime.now().strftime("%d/%m/%Y %H:%M")],
-        "Num_Fases": [num_fases],
-        "Tp_Total": [tp_total],
-        "Fluxos": [fluxos_str],
-        "Saturações": [saturacoes_str],
-        
-    }
-    df_export = pd.DataFrame(export_data)
-    csv = df_export.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+if st.button("📥 Baixar CSV"):
+    # Dados de entreverdes
+    if "df_fases" in locals():
+        df_fases_export = df_fases.copy()
+        df_fases_export.insert(0, "Tipo", "Entreverdes por Fase")
+    else:
+        df_fases_export = pd.DataFrame(columns=["Tipo", "Fase", "Tempo de Amarelo (s)", "Tempo de Vermelho (s)", "Entreverdes Total (s)"])
 
+    # Dados de tempos verdes
+    if "df_verde" in locals():
+        df_verde_export = df_verde.copy()
+        df_verde_export.insert(0, "Tipo", "Tempos Verdes Efetivos")
+    else:
+        df_verde_export = pd.DataFrame(columns=["Tipo", "Fase", "Tempo Verde Efetivo (s)"])
+
+    # Combinar tudo
+    df_export = pd.concat([df_fases_export, df_verde_export], ignore_index=True)
+
+    # Adicionar informações gerais
+    resumo = pd.DataFrame({
+        "Tipo": ["Resumo"],
+        "Tp_Total (s)": [round(tp_total, 1)],
+        "Ciclo Ótimo Webster (s)": [round(st.session_state.get("tc", 0), 1)],
+        "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")]
+    })
+    df_export = pd.concat([df_export, resumo], ignore_index=True)
+
+    # Gerar CSV
+    csv = df_export.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="📥 Baixar Resultados em CSV",
+        data=csv,
+        file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+        mime="text/csv"
+    )
 
 
 
