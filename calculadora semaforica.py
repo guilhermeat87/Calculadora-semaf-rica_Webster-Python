@@ -78,7 +78,7 @@ st.title("🚦 Calculadora de Sinalização Semafórica")
 st.markdown("Ferramenta interativa baseada no **Manual Brasileiro de Sinalização de Trânsito (Volume V)**")
 
 st.divider()
-st.header("1️⃣ Tempo de Entreverdes por Fase")
+st.header("Tempo de Entreverdes por Fase")
 
 num_fases = st.number_input("Número de Fases", 2, 6, 3)
 fases = []
@@ -124,7 +124,7 @@ if st.button("Calcular Todas as Fases"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("2️⃣ Método de Webster")
+st.header("Método de Webster")
 
 tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=float(tp_total if tp_total > 0 else 9))
 fluxos_str = st.text_input("Fluxo de Veículos (vph) separados por vírgula", "100,300,300")
@@ -143,10 +143,10 @@ if st.button("Calcular Ciclo Ótimo (Webster)"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("3️⃣ Tempo Verde Efetivo")
+st.header("Tempo Verde Efetivo")
 
-tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=float(60))
-tp_input = st.number_input("Tempo Perdido (Tp) [s]", value=float(tp))
+tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=int(60))
+tp_input = st.number_input("Tempo Perdido (Tp) [s]", value=int(tp))
 fluxos2_str = st.text_input("Fluxos de Veículos (repetir se necessário)", fluxos_str)
 saturacoes2_str = st.text_input("Fluxos de Saturação (repetir se necessário)", saturacoes_str)
 
@@ -180,5 +180,6 @@ if st.button("Exportar para Excel (CSV)"):
     df_export = pd.DataFrame(export_data)
     csv = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+
 
 
