@@ -175,7 +175,6 @@ if st.button("Calcular Tempos Verdes"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("📤 Exportar Resultados")
 
 if st.button("Baixar CSV"):
     # Dados de entreverdes
@@ -213,6 +212,7 @@ if st.button("Baixar CSV"):
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv"
     )
+
 
 
 
