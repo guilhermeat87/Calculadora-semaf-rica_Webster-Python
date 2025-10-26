@@ -39,7 +39,6 @@ def calcular_entreverdes(d2, v, aad, tr, i, c, travessia=False):
     total = math.ceil(ty + trc)
     return {"amarelo": round(ty, 2), "vermelho": round(trc, 2), "total": total}
 
-
 def webster(tp, fluxos, saturacoes):
     yi = [v / s for v, s in zip(fluxos, saturacoes)]
     soma_yi = sum(yi)
@@ -47,7 +46,6 @@ def webster(tp, fluxos, saturacoes):
         raise ValueError("Σyi deve ser menor que 1 para o método de Webster.")
     ciclo_otimo = ((1.5 * tp) + 5) / (1 - soma_yi)
     return round(ciclo_otimo, 0), yi, soma_yi
-
 
 def tempo_verde(tc, tp, fluxos, saturacoes):
     yi = [v / s for v, s in zip(fluxos, saturacoes)]
@@ -59,9 +57,8 @@ def tempo_verde(tc, tp, fluxos, saturacoes):
     return tempos, yi, soma_yi
 
 
-# -------------------------------------------------------------
+
 # INTERFACE STREAMLIT
-# -------------------------------------------------------------
 st.set_page_config(page_title="Calculadora Semafórica", page_icon="🚦", layout="centered")
 st.markdown("""
 <style>
@@ -69,8 +66,7 @@ st.markdown("""
     .main {
         background-color: #f8fafc;
         padding: 2rem;
-        border-radius: 10px;
-    }
+        border-radius: 10px;}
     /* Cabeçalhos */
     h1 {
         text-align: center;
@@ -275,6 +271,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
