@@ -109,24 +109,32 @@ for i in range(num_fases):
             fases.append(res)
 
 # Botão geral
-if st.button("Calcular Todas as Fases"):
+f st.button("Calcular Todas as Fases"):
+    fases = []
+    tp_total = 0
+
     for i in range(num_fases):
         res = calcular_entreverdes(
             st.session_state[f"d2_{i}"],
             st.session_state[f"v_{i}"],
             st.session_state[f"aad_{i}"],
             st.session_state[f"tr_{i}"],
-            st.session_state[f"i_{i}"] / 100,
+            st.session_state[f"i_{i}"],
             st.session_state[f"c_{i}"],
-            st.session_state[f"ctrl_{i}"],
-            st.session_state[f"ped_{i}"],
+            st.session_state[f"ped_{i}"],  # mantém travessia
         )
-        fases.append(res)
+        fases.append({
+            "Fase": f"Fase {i+1}",
+            "Tempo de Amarelo (s)": res["amarelo"],
+            "Tempo de Vermelho (s)": res["vermelho"],
+            "Entreverdes Total (s)": res["total"]
+        })
         tp_total += res["total"]
 
-    df_fases = pd.DataFrame(fases)
-    df_fases.index = [f"Fase {i+1}" for i in range(num_fases)]
-    st.dataframe(df_fases)
+    st.session_state["tp_total"] = tp_total
+    st.session_state["df_fases"] = pd.DataFrame(fases)
+
+    st.dataframe(st.session_state["df_fases"])
     st.info(f"**Tempo Perdido Total (Tp): {tp_total:.1f} s**")
 
 # -------------------------------------------------------------
@@ -161,12 +169,18 @@ saturacoes2_str = st.text_input("Fluxos de Saturação (repetir se necessário)"
 if st.button("Calcular Tempos Verdes"):
     fluxos = [float(x.strip()) for x in fluxos2_str.split(",")]
     saturacoes = [float(x.strip()) for x in saturacoes2_str.split(",")]
+
     try:
         tempos, yi, soma_yi = tempo_verde(tc_input, tp_input, fluxos, saturacoes)
         df_verde = pd.DataFrame({
             "Fase": [f"Fase {i+1}" for i in range(len(tempos))],
             "Tempo Verde Efetivo (s)": tempos
         })
+
+        # 🔹 salva no estado da sessão
+        st.session_state["df_verde"] = df_verde
+        st.session_state["tc"] = tc_input
+
         st.dataframe(df_verde)
         if any(t < 12 for t in tempos):
             st.warning("⚠️ Pelo menos uma fase possui tempo verde inferior a 12 segundos.")
@@ -176,34 +190,28 @@ if st.button("Calcular Tempos Verdes"):
 # -------------------------------------------------------------
 st.divider()
 
-if st.button("Baixar CSV"):
-    # Dados de entreverdes
-    if "df_fases" in locals():
-        df_fases_export = df_fases.copy()
-        df_fases_export.insert(0, "Tipo", "Entreverdes por Fase")
-    else:
-        df_fases_export = pd.DataFrame(columns=["Tipo", "Fase", "Tempo de Amarelo (s)", "Tempo de Vermelho (s)", "Entreverdes Total (s)"])
+if st.button("📥 Baixar CSV"):
+    df_export_parts = []
 
-    # Dados de tempos verdes
-    if "df_verde" in locals():
-        df_verde_export = df_verde.copy()
-        df_verde_export.insert(0, "Tipo", "Tempos Verdes Efetivos")
-    else:
-        df_verde_export = pd.DataFrame(columns=["Tipo", "Fase", "Tempo Verde Efetivo (s)"])
+    if "df_fases" in st.session_state:
+        df_fases = st.session_state["df_fases"].copy()
+        df_fases.insert(0, "Tipo", "Entreverdes por Fase")
+        df_export_parts.append(df_fases)
 
-    # Combinar tudo
-    df_export = pd.concat([df_fases_export, df_verde_export], ignore_index=True)
+    if "df_verde" in st.session_state:
+        df_verde = st.session_state["df_verde"].copy()
+        df_verde.insert(0, "Tipo", "Tempos Verdes Efetivos")
+        df_export_parts.append(df_verde)
 
-    # Adicionar informações gerais
     resumo = pd.DataFrame({
         "Tipo": ["Resumo"],
-        "Tp_Total (s)": [round(tp_total, 1)],
+        "Tp_Total (s)": [round(st.session_state.get("tp_total", 0), 1)],
         "Ciclo Ótimo Webster (s)": [round(st.session_state.get("tc", 0), 1)],
         "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")]
     })
-    df_export = pd.concat([df_export, resumo], ignore_index=True)
+    df_export_parts.append(resumo)
 
-    # Gerar CSV
+    df_export = pd.concat(df_export_parts, ignore_index=True)
     csv = df_export.to_csv(index=False).encode("utf-8")
 
     st.download_button(
