@@ -114,7 +114,7 @@ st.markdown(
     Você pode baixar o documento completo clicando no link abaixo:  
     [Baixar Manual em PDF](https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/docs/copy_of___05___MBST_Vol._V___Sinalizacao_Semaforica.pdf)
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True)
 
 # -------------------------------------------------------------
 st.divider()
@@ -278,6 +278,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
