@@ -46,7 +46,7 @@ def webster(tp, fluxos, saturacoes):
     if soma_yi >= 1:
         raise ValueError("Σyi deve ser menor que 1 para o método de Webster.")
     ciclo_otimo = ((1.5 * tp) + 5) / (1 - soma_yi)
-    return round(ciclo_otimo, 1), yi, soma_yi
+    return round(ciclo_otimo, 0), yi, soma_yi
 
 
 def tempo_verde(tc, tp, fluxos, saturacoes):
@@ -55,7 +55,7 @@ def tempo_verde(tc, tp, fluxos, saturacoes):
     if soma_yi == 0:
         raise ValueError("Σyi não pode ser zero.")
     teg = tc - tp
-    tempos = [round(teg * (y / soma_yi), 1) for y in yi]
+    tempos = [round(teg * (y / soma_yi), 0) for y in yi]
     return tempos, yi, soma_yi
 
 
@@ -129,11 +129,10 @@ if st.button("Calcular Todas as Fases"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("2️⃣ Método de Webster")
+st.header("Método de Webster")
 
 tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=float(st.session_state.get("tp_total", 9)))
 
-st.subheader("Fluxos por Fase")
 fluxos = []
 saturacoes = []
 
@@ -224,6 +223,7 @@ if st.button("📥 Baixar CSV"):
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv"
     )
+
 
 
 
