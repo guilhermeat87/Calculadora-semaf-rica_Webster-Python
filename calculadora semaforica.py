@@ -191,7 +191,7 @@ if st.button("Calcular Tempos Verdes"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("📤 Exportar Resultados")
+st.header("Exportar Resultados")
 
 if st.button("📥 Baixar CSV"):
     df_export_parts = []
@@ -217,12 +217,7 @@ if st.button("📥 Baixar CSV"):
     df_export = pd.concat(df_export_parts, ignore_index=True)
     csv = df_export.to_csv(index=False).encode("utf-8")
 
-    st.download_button(
-        label="📥 Baixar Resultados em CSV",
-        data=csv,
-        file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-        mime="text/csv"
-    )
+  
 
 
 
