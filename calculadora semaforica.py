@@ -142,9 +142,36 @@ st.divider()
 st.header("Método de Webster")
 
 tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=int(tp_total if tp_total > 0 else 9))
-fluxos_str = st.text_input("Fluxo de Veículos (vph) separados por vírgula", "1000,100,100")
-saturacoes_str = st.text_input("Fluxo de Saturação (vph) separados por vírgula", "1800,1800,1800")
+st.divider()
+st.header("2️⃣ Método de Webster")
 
+tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=float(st.session_state.get("tp_total", 9)))
+
+st.subheader("Fluxos por Fase")
+fluxos = []
+saturacoes = []
+
+cols = st.columns(2)
+for i in range(num_fases):
+    with cols[0]:
+        fluxo = st.number_input(f"Fluxo de Veículos - Fase {i+1} (vph)", min_value=0, value=100, key=f"fluxo_{i}")
+        fluxos.append(fluxo)
+    with cols[1]:
+        sat = st.number_input(f"Fluxo de Saturação - Fase {i+1} (vph)", min_value=1, value=1800, key=f"sat_{i}")
+        saturacoes.append(sat)
+
+if st.button("Calcular Ciclo Ótimo (Webster)"):
+    try:
+        tc, yi, soma_yi = webster(tp, fluxos, saturacoes)
+        st.session_state["tc"] = tc
+        st.session_state["fluxos"] = fluxos
+        st.session_state["saturacoes"] = saturacoes
+
+        st.success(f"**Ciclo Ótimo: {tc:.1f} s**")
+        st.write(f"Σyi = {soma_yi:.3f}")
+        st.write(f"yi = {', '.join([f'{y:.3f}' for y in yi])}")
+    except Exception as e:
+        st.error(str(e))
 if st.button("Calcular Ciclo Ótimo (Webster)"):
     fluxos = [float(x.strip()) for x in fluxos_str.split(",")]
     saturacoes = [float(x.strip()) for x in saturacoes_str.split(",")]
@@ -220,6 +247,7 @@ if st.button("Baixar dados"):
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv"
     )
+
 
 
 
