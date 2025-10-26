@@ -106,6 +106,7 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
 st.title("🚦 Calculadora Semafórica")
 st.markdown("Ferramenta baseada no **Manual Brasileiro de Sinalização de Trânsito (Volume V) de 2022**")
 st.markdown(
@@ -115,7 +116,10 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
+st.markdown(
+    "[📖 Baixar Manual Brasileiro de Sinalização (Vol. V)](https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/docs/copy_of___05___MBST_Vol._V___Sinalizacao_Semaforica.pdf)",
+    unsafe_allow_html=True
+)
 # -------------------------------------------------------------
 st.divider()
 st.header("Tempo de Entreverdes por Fase")
@@ -268,6 +272,7 @@ if df_export_parts:  # só mostra o botão se houver dados
     )
 else:
     st.info("⚠️ Nenhum dado disponível para exportação. Calcule primeiro os entreverdes ou tempos verdes.")
+
 
 
 
