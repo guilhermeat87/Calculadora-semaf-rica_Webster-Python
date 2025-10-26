@@ -24,12 +24,10 @@ def calcular_entreverdes(d2, v, aad, tr, i, c, travessia=False):
         ty = 4
     elif v == 70 and ty < 5:
         ty = 5
-
     # Limite máximo 5s
     if ty > 5:
         trc += (ty - 5)
         ty = 5
-
     # Acréscimo travessia
     if travessia:
         trc += 1
@@ -258,6 +256,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
