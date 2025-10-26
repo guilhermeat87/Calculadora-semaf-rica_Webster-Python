@@ -127,7 +127,7 @@ st.divider()
 st.header("Método de Webster")
 
 tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=float(tp_total if tp_total > 0 else 9))
-fluxos_str = st.text_input("Fluxo de Veículos (vph) separados por vírgula", "100,300,300")
+fluxos_str = st.text_input("Fluxo de Veículos (vph) separados por vírgula", "0,0,0")
 saturacoes_str = st.text_input("Fluxo de Saturação (vph) separados por vírgula", "1800,1800,1800")
 
 if st.button("Calcular Ciclo Ótimo (Webster)"):
@@ -145,7 +145,7 @@ if st.button("Calcular Ciclo Ótimo (Webster)"):
 st.divider()
 st.header("Tempo Verde Efetivo")
 
-tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=int(60))
+tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=int(tc))
 tp_input = st.number_input("Tempo Perdido (Tp) [s]", value=int(tp))
 fluxos2_str = st.text_input("Fluxos de Veículos (repetir se necessário)", fluxos_str)
 saturacoes2_str = st.text_input("Fluxos de Saturação (repetir se necessário)", saturacoes_str)
@@ -180,6 +180,7 @@ if st.button("Exportar para Excel (CSV)"):
     df_export = pd.DataFrame(export_data)
     csv = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+
 
 
 
