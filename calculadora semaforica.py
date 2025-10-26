@@ -143,7 +143,7 @@ if st.button("Calcular Ciclo Ótimo (Webster)"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("3️⃣ Tempo Verde Efetivo")
+st.header(" Tempo Verde Efetivo")
 
 tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=float(60))
 tp_input = st.number_input("Tempo Perdido (Tp) [s]", value=float(tp))
@@ -180,3 +180,4 @@ if st.button("Exportar para Excel (CSV)"):
     df_export = pd.DataFrame(export_data)
     csv = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+
