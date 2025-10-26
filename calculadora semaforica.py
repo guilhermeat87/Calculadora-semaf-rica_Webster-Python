@@ -96,12 +96,12 @@ for i in range(num_fases):
     with st.expander(f"⚙️ Parâmetros da Fase {i+1}", expanded=(i == 0)):
         d2 = st.number_input(f"Distância de Percurso (m) - Fase {i+1}", value=24.0, key=f"d2_{i}")
         v = st.number_input(f"Velocidade (km/h) - Fase {i+1}", value=40.0, key=f"v_{i}")
-        aad = st.number_input(f"Máx. Taxa de Frenagem (m/s²) - Fase {i+1}", value=3.0, key=f"aad_{i}")
-        tr = st.number_input(f"Tempo de Reação (s) - Fase {i+1}", value=1.0, key=f"tr_{i}")
+        aad = st.number_input(f"Máx. Taxa de Frenagem (m/s²) - Fase {i+1} (Valor Padrão)", value=3.0, key=f"aad_{i}")
+        tr = st.number_input(f"Tempo de Reação (s) - Fase {i+1} (Valor padrão)", value=1.0, key=f"tr_{i}")
         i_slope = st.number_input(f"Inclinação (%) - Fase {i+1}", value=0.0, key=f"i_{i}") / 100
         c = st.number_input(f"Comprimento do Veículo (m) - Fase {i+1}", value=12.0, key=f"c_{i}")
         controlador = st.checkbox("Controlador Antigo?", key=f"ctrl_{i}")
-        travessia = st.checkbox("Travessia de Pedestres?", key=f"ped_{i}")
+        travessia = st.checkbox("Travessia de Pedestres no estágio subsequente?", key=f"ped_{i}")
 
         if st.button(f"Calcular Fase {i+1}", key=f"calc_{i}"):
             res = calcular_entreverdes(d2, v, aad, tr, i_slope, c, controlador, travessia)
@@ -189,6 +189,7 @@ if st.button("Exportar para Excel (CSV)"):
     df_export = pd.DataFrame(export_data)
     csv = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+
 
 
 
