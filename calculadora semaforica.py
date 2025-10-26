@@ -77,8 +77,7 @@ st.set_page_config(page_title="Calculadora Semafórica", page_icon="🚦", layou
 st.title("🚦 Calculadora de Sinalização Semafórica")
 st.markdown("Ferramenta  baseada no **Manual Brasileiro de Sinalização de Trânsito (Volume V)**")
 st.markdown(
-    """
-    📘 **Manual Brasileiro de Sinalização de Trânsito (Volume V)**  
+    """ 
     Você pode baixar o documento completo clicando no link abaixo:  
     👉 [Baixar Manual em PDF](https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/docs/copy_of___05___MBST_Vol._V___Sinalizacao_Semaforica.pdf)
     """,
@@ -190,6 +189,7 @@ if st.button("Exportar para Excel (CSV)"):
     df_export = pd.DataFrame(export_data)
     csv = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+
 
 
 
