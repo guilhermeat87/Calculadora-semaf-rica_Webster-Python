@@ -126,7 +126,7 @@ if st.button("Calcular Todas as Fases"):
 st.divider()
 st.header("Método de Webster")
 
-tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=float(tp_total if tp_total > 0 else 9))
+tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=int(tp_total if tp_total > 0 else 9))
 fluxos_str = st.text_input("Fluxo de Veículos (vph) separados por vírgula", "0,0,0")
 saturacoes_str = st.text_input("Fluxo de Saturação (vph) separados por vírgula", "1800,1800,1800")
 
@@ -176,10 +176,12 @@ if st.button("Exportar para Excel (CSV)"):
         "Tp_Total": [tp_total],
         "Fluxos": [fluxos_str],
         "Saturações": [saturacoes_str],
+        "
     }
     df_export = pd.DataFrame(export_data)
     csv = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+
 
 
 
