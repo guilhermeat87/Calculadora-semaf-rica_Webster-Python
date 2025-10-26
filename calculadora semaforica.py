@@ -63,9 +63,51 @@ def tempo_verde(tc, tp, fluxos, saturacoes):
 # INTERFACE STREAMLIT
 # -------------------------------------------------------------
 st.set_page_config(page_title="Calculadora Semafórica", page_icon="🚦", layout="centered")
-
-st.title("🚦 Calculadora de Sinalização Semafórica")
-st.markdown("Ferramenta baseada no **Manual Brasileiro de Sinalização de Trânsito (Volume V)**")
+st.markdown("""
+<style>
+    /* Fundo e layout */
+    .main {
+        background-color: #f8fafc;
+        padding: 2rem;
+        border-radius: 10px;
+    }
+    /* Cabeçalhos */
+    h1 {
+        text-align: center;
+        color: #1565c0;
+        font-size: 2.2rem !important;
+        margin-bottom: 0.3em;
+    }
+    h2, h3 {
+        color: #0d47a1;
+        margin-top: 1.2em;
+    }
+    /* Botões */
+    .stButton>button {
+        background-color: #1565c0;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.6em 1.2em;
+        box-shadow: 0 2px 5px rgba(21,101,192,0.3);
+    }
+    .stButton>button:hover {
+        background-color: #0d47a1;
+    }
+    /* Tabelas */
+    th {
+        background-color: #e3f2fd !important;
+        color: #0d47a1 !important;
+        text-align: center !important;
+    }
+    td {
+        text-align: center !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+st.title("🚦 Calculadora Semafórica")
+st.markdown("Ferramenta baseada no **Manual Brasileiro de Sinalização de Trânsito (Volume V) de 2022**")
 st.markdown(
     """ 
     Você pode baixar o documento completo clicando no link abaixo:  
@@ -226,6 +268,7 @@ if df_export_parts:  # só mostra o botão se houver dados
     )
 else:
     st.info("⚠️ Nenhum dado disponível para exportação. Calcule primeiro os entreverdes ou tempos verdes.")
+
 
 
 
