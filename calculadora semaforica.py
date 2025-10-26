@@ -10,10 +10,8 @@ import pandas as pd
 import math
 from datetime import datetime
 
-
-# -------------------------------------------------------------
 # FUNÇÕES DE CÁLCULO
-# -------------------------------------------------------------
+
 def calcular_entreverdes(d2, v, aad, tr, i, c, travessia=False):
     g = 9.8
     ty = tr + (v / 3.6) / (2 * (aad + i * g))
@@ -56,9 +54,8 @@ def tempo_verde(tc, tp, fluxos, saturacoes):
     tempos = [round(teg * (y / soma_yi), 0) for y in yi]
     return tempos, yi, soma_yi
 
-
-
 # INTERFACE STREAMLIT
+
 st.set_page_config(page_title="Calculadora Semafórica", page_icon="🚦", layout="centered")
 st.markdown("""
 <style>
@@ -72,12 +69,10 @@ st.markdown("""
         text-align: center;
         color: #1565c0;
         font-size: 2.2rem !important;
-        margin-bottom: 0.3em;
-    }
+        margin-bottom: 0.3em;}
     h2, h3 {
         color: #0d47a1;
-        margin-top: 1.2em;
-    }
+        margin-top: 1.2em;}
     /* Botões */
     .stButton>button {
         background-color: #1565c0;
@@ -86,20 +81,16 @@ st.markdown("""
         border-radius: 8px;
         font-weight: 500;
         padding: 0.6em 1.2em;
-        box-shadow: 0 2px 5px rgba(21,101,192,0.3);
-    }
+        box-shadow: 0 2px 5px rgba(21,101,192,0.3);}
     .stButton>button:hover {
-        background-color: #0d47a1;
-    }
+        background-color: #0d47a1;}
     /* Tabelas */
     th {
         background-color: #e3f2fd !important;
         color: #0d47a1 !important;
-        text-align: center !important;
-    }
+        text-align: center !important;}
     td {
-        text-align: center !important;
-    }
+        text-align: center !important;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -133,10 +124,8 @@ for i in range(num_fases):
         if st.button(f"Calcular Fase {i+1}", key=f"calc_{i}"):
             res = calcular_entreverdes(d2, v, aad, tr, i_slope, c, travessia)
             st.success(
-                f"Fase {i+1}: Amarelo = {res['amarelo']}s | Vermelho = {res['vermelho']}s | Total = {res['total']}s"
-            )
+                f"Fase {i+1}: Amarelo = {res['amarelo']}s | Vermelho = {res['vermelho']}s | Total = {res['total']}s")
             fases.append(res)
-
 if st.button("Calcular Todas as Fases"):
     fases = []
     tp_total = 0
@@ -214,8 +203,7 @@ if st.button("Calcular Tempos Verdes"):
             tempos, yi, soma_yi = tempo_verde(tc_input, tp_input, fluxos, saturacoes)
             df_verde = pd.DataFrame({
                 "Fase": [f"Fase {i+1}" for i in range(len(tempos))],
-                "Tempo Verde Efetivo (s)": tempos
-            })
+                "Tempo Verde Efetivo (s)": tempos})
 
             st.session_state["df_verde"] = df_verde
             st.session_state["tc"] = tc_input
@@ -247,8 +235,7 @@ resumo = pd.DataFrame({
     "Tipo": ["Resumo"],
     "Tp_Total (s)": [round(st.session_state.get("tp_total", 0), 1)],
     "Ciclo Ótimo Webster (s)": [round(st.session_state.get("tc", 0), 1)],
-    "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")]
-})
+    "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")]})
 df_export_parts.append(resumo)
 
 if df_export_parts:  # só mostra o botão se houver dados
@@ -271,6 +258,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
