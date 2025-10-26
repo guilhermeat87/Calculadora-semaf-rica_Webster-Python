@@ -191,33 +191,43 @@ if st.button("Calcular Tempos Verdes"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("Exportar Resultados")
+st.header("📤 Exportar Resultados")
 
-if st.button("📥 Baixar CSV"):
-    df_export_parts = []
+# Monta os dados de exportação
+df_export_parts = []
 
-    if "df_fases" in st.session_state:
-        df_fases = st.session_state["df_fases"].copy()
-        df_fases.insert(0, "Tipo", "Entreverdes por Fase")
-        df_export_parts.append(df_fases)
+if "df_fases" in st.session_state:
+    df_fases = st.session_state["df_fases"].copy()
+    df_fases.insert(0, "Tipo", "Entreverdes por Fase")
+    df_export_parts.append(df_fases)
 
-    if "df_verde" in st.session_state:
-        df_verde = st.session_state["df_verde"].copy()
-        df_verde.insert(0, "Tipo", "Tempos Verdes Efetivos")
-        df_export_parts.append(df_verde)
+if "df_verde" in st.session_state:
+    df_verde = st.session_state["df_verde"].copy()
+    df_verde.insert(0, "Tipo", "Tempos Verdes Efetivos")
+    df_export_parts.append(df_verde)
 
-    resumo = pd.DataFrame({
-        "Tipo": ["Resumo"],
-        "Tp_Total (s)": [round(st.session_state.get("tp_total", 0), 1)],
-        "Ciclo Ótimo Webster (s)": [round(st.session_state.get("tc", 0), 1)],
-        "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")]
-    })
-    df_export_parts.append(resumo)
+resumo = pd.DataFrame({
+    "Tipo": ["Resumo"],
+    "Tp_Total (s)": [round(st.session_state.get("tp_total", 0), 1)],
+    "Ciclo Ótimo Webster (s)": [round(st.session_state.get("tc", 0), 1)],
+    "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")]
+})
+df_export_parts.append(resumo)
 
+if df_export_parts:  # só mostra o botão se houver dados
     df_export = pd.concat(df_export_parts, ignore_index=True)
     csv = df_export.to_csv(index=False).encode("utf-8")
 
-  
+    st.download_button(
+        label="📥 Baixar Resultados em CSV",
+        data=csv,
+        file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+        mime="text/csv"
+    )
+else:
+    st.info("⚠️ Nenhum dado disponível para exportação. Calcule primeiro os entreverdes ou tempos verdes.")
+
+
 
 
 
