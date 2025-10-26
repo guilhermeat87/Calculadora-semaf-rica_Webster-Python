@@ -176,11 +176,12 @@ if st.button("Exportar para Excel (CSV)"):
         "Tp_Total": [tp_total],
         "Fluxos": [fluxos_str],
         "Saturações": [saturacoes_str],
-        "
+        
     }
     df_export = pd.DataFrame(export_data)
     csv = df_export.to_csv(index=False).encode("utf-8")
     st.download_button("📥 Baixar CSV", csv, "calculadora_semaforo.csv", "text/csv")
+
 
 
 
