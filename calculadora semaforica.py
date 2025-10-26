@@ -172,7 +172,7 @@ if st.button("Calcular Ciclo Ótimo (Webster)"):
         st.write(f"yi = {', '.join([f'{y:.3f}' for y in yi])}")
     except Exception as e:
         st.error(str(e))
-if st.button("Calcular Ciclo Ótimo (Webster)"):
+if st.button("Calcular Ciclo Ótimo (Webster)", key="btn_webster"):
     fluxos = [float(x.strip()) for x in fluxos_str.split(",")]
     saturacoes = [float(x.strip()) for x in saturacoes_str.split(",")]
     try:
@@ -247,6 +247,7 @@ if st.button("Baixar dados"):
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv"
     )
+
 
 
 
