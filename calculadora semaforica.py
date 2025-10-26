@@ -153,8 +153,7 @@ if st.button("Calcular Todas as Fases"):
             st.session_state[f"tr_{i}"],
             st.session_state[f"i_{i}"],
             st.session_state[f"c_{i}"],
-            st.session_state[f"ped_{i}"],
-        )
+            st.session_state[f"ped_{i}"],)
         fases.append({
             "Fase": f"Fase {i+1}",
             "Tempo de Amarelo (s)": res["amarelo"],
@@ -233,7 +232,7 @@ if st.button("Calcular Tempos Verdes"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("📤 Exportar Resultados")
+st.header("Exportar Resultados")
 
 # Monta os dados de exportação
 df_export_parts = []
@@ -261,23 +260,22 @@ if df_export_parts:  # só mostra o botão se houver dados
     csv = df_export.to_csv(index=False).encode("utf-8")
 
     st.download_button(
-        label="📥 Baixar Resultados em CSV",
+        label="Baixar Resultados em CSV",
         data=csv,
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-        mime="text/csv"
-    )
+        mime="text/csv")
 else:
     st.info("⚠️ Nenhum dado disponível para exportação. Calcule primeiro os entreverdes ou tempos verdes.")
 st.markdown(
     """
     <hr style="border: 1px solid #1e2d4a; margin-top: 2em;">
     <div style='text-align: center; color: #90caf9; font-size: 0.9rem; margin-top: 1em;'>
-        Desenvolvido por <strong>Guilherme Andrade Teixeira</strong> 🚧<br>
+        Desenvolvido por <strong>Guilherme Andrade Teixeira</strong> <br>
         © 2025 — Todos os direitos reservados.
     </div>
     """,
-    unsafe_allow_html=True
-)
+    unsafe_allow_html=True)
+
 
 
 
