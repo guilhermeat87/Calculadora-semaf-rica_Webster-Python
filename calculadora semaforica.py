@@ -109,7 +109,7 @@ for i in range(num_fases):
             fases.append(res)
 
 # Botão geral
-f st.button("Calcular Todas as Fases"):
+if st.button("Calcular Todas as Fases"):
     fases = []
     tp_total = 0
 
@@ -220,6 +220,7 @@ if st.button("📥 Baixar CSV"):
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv"
     )
+
 
 
 
