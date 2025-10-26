@@ -190,7 +190,7 @@ if st.button("Calcular Tempos Verdes"):
 # -------------------------------------------------------------
 st.divider()
 
-if st.button("📥 Baixar CSV"):
+if st.button("Baixar dados"):
     df_export_parts = []
 
     if "df_fases" in st.session_state:
@@ -220,6 +220,7 @@ if st.button("📥 Baixar CSV"):
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
         mime="text/csv"
     )
+
 
 
 
