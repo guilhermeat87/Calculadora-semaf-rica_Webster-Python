@@ -111,10 +111,10 @@ tp_total = 0
 
 for i in range(num_fases):
     with st.expander(f"⚙️ Parâmetros da Fase {i+1}", expanded=(i == 0)):
-        d2 = st.number_input(f"Distância de Percurso (m) - Fase {i+1}", value=24.0, key=f"d2_{i}")
+        d2 = st.number_input(f"– extensão da trajetória do veículo entre a linha de retenção e o término da área de conflito - Fase {i+1}", value=24.0, key=f"d2_{i}")
         v = st.number_input(f"Velocidade (km/h) - Fase {i+1}", value=40.0, key=f"v_{i}")
-        aad = st.number_input(f"Máx. Taxa de Frenagem (m/s²) - Fase {i+1}", value=3.0, key=f"aad_{i}")
-        tr = st.number_input(f"Tempo de Reação (s) - Fase {i+1}", value=1.0, key=f"tr_{i}")
+        aad = st.number_input(f"Máx. Taxa de Frenagem (m/s²) (Valor Default) - Fase {i+1}", value=3.0, key=f"aad_{i}")
+        tr = st.number_input(f"Tempo de Reação (s) (Valor default) - Fase {i+1}", value=1.0, key=f"tr_{i}")
         i_slope = st.number_input(f"Inclinação (%) - Fase {i+1}", value=0.0, key=f"i_{i}") / 100
         c = st.number_input(f"Comprimento do Veículo (m) - Fase {i+1}", value=12.0, key=f"c_{i}")
         travessia = st.checkbox("Travessia de Pedestres no estágio subsequente?", key=f"ped_{i}")
@@ -256,6 +256,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
