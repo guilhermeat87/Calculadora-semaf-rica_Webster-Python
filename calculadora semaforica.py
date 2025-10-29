@@ -213,7 +213,7 @@ if st.button("Calcular Tempos Verdes"):
             st.error(str(e))
 
 # -------------------------------------------------------------
-if st.button("Calcular Tempos Verdes"):
+if st.button("Calcular Tempos Verdes", key="btn_verde"):
     fluxos = st.session_state.get("fluxos", [])
     saturacoes = st.session_state.get("saturacoes", [])
 
@@ -221,7 +221,6 @@ if st.button("Calcular Tempos Verdes"):
         st.error("⚠️ Você precisa calcular o Método de Webster primeiro para definir os fluxos.")
     else:
         try:
-            # cálculo normal
             tempos, yi, soma_yi = tempo_verde(tc_input, tp_input, fluxos, saturacoes)
             df_verde = pd.DataFrame({
                 "Fase": [f"Fase {i+1}" for i in range(len(tempos))],
@@ -239,6 +238,7 @@ if st.button("Calcular Tempos Verdes"):
                 tc_recalc = ((t_verde_seguro / tempos[idx_min]) * tc_input)
                 tc_recalc = round(tc_recalc)
                 st.session_state["tc_recalc"] = tc_recalc
+                st.session_state["tc"] = tc_recalc  # atualiza valor do ciclo no estado
 
                 novo_teg = tc_recalc - tp_input
                 soma_yi = sum([v/s for v, s in zip(fluxos, saturacoes)])
@@ -247,13 +247,8 @@ if st.button("Calcular Tempos Verdes"):
                 df_verde["Tempo Verde Efetivo (s)"] = novos_tempos
                 st.info(f"🔁 Ciclo recalculado: **{tc_recalc}s** (substitui o valor anterior)")
 
-            # salva no estado e mostra resultados
             st.session_state["df_verde"] = df_verde
-            st.session_state["tc"] = tc_input
-
-            st.dataframe(df_verde)
-            if any(t < 12 for t in df_verde["Tempo Verde Efetivo (s)"]):
-                st.warning("⚠️ Pelo menos uma fase possui tempo verde inferior a 12 segundos.")
+            st.dataframe(df_verde, use_container_width=True)
 
         except Exception as e:
             st.error(str(e))
@@ -302,6 +297,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
