@@ -35,6 +35,7 @@ def calcular_entreverdes(d2, v, aad, tr, i, c, travessia=False):
     total = math.ceil(ty + trc)
     return {"amarelo": round(ty, 2), "vermelho": round(trc, 2), "total": total}
 
+
 def webster(tp, fluxos, saturacoes):
     yi = [v / s for v, s in zip(fluxos, saturacoes)]
     soma_yi = sum(yi)
@@ -42,6 +43,7 @@ def webster(tp, fluxos, saturacoes):
         raise ValueError("Σyi deve ser menor que 1 para o método de Webster.")
     ciclo_otimo = ((1.5 * tp) + 5) / (1 - soma_yi)
     return round(ciclo_otimo, 0), yi, soma_yi
+
 
 def tempo_verde(tc, tp, fluxos, saturacoes):
     yi = [v / s for v, s in zip(fluxos, saturacoes)]
@@ -52,17 +54,17 @@ def tempo_verde(tc, tp, fluxos, saturacoes):
     tempos = [round(teg * (y / soma_yi), 0) for y in yi]
     return tempos, yi, soma_yi
 
+
 # INTERFACE STREAMLIT
 
 st.set_page_config(page_title="Calculadora Semafórica", page_icon="🚦", layout="centered")
+
 st.markdown("""
 <style>
-    /* Fundo e layout */
     .main {
         background-color: #f8fafc;
         padding: 2rem;
         border-radius: 10px;}
-    /* Cabeçalhos */
     h1 {
         text-align: center;
         color: #1565c0;
@@ -71,7 +73,6 @@ st.markdown("""
     h2, h3 {
         color: #0d47a1;
         margin-top: 1.2em;}
-    /* Botões */
     .stButton>button {
         background-color: #1565c0;
         color: white;
@@ -82,7 +83,6 @@ st.markdown("""
         box-shadow: 0 2px 5px rgba(21,101,192,0.3);}
     .stButton>button:hover {
         background-color: #0d47a1;}
-    /* Tabelas */
     th {
         background-color: #e3f2fd !important;
         color: #0d47a1 !important;
@@ -105,18 +105,18 @@ st.markdown(
 st.divider()
 st.header("Tempo de Entreverdes por Fase")
 
-num_fases = st.number_input("Número de Fases", 2, 6, 3)
+num_fases = st.number_input("Número de Fases", min_value=2, max_value=6, value=3, step=1)
 fases = []
 tp_total = 0
 
 for i in range(num_fases):
     with st.expander(f"⚙️ Parâmetros da Fase {i+1}", expanded=(i == 0)):
-        d2 = st.number_input(f"Extensão da trajetória do veículo entre a linha de retenção e o término da área de conflito (m) - Fase {i+1}", value=24.0, key=f"d2_{i}")
-        v = st.number_input(f"Velocidade (km/h) - Fase {i+1}", value=40.0, key=f"v_{i}")
-        aad = st.number_input(f"Máx. Taxa de Frenagem (m/s²) (Valor Default) - Fase {i+1}", value=3.0, key=f"aad_{i}")
-        tr = st.number_input(f"Tempo de Reação (s) (Valor default) - Fase {i+1}", value=1.0, key=f"tr_{i}")
-        i_slope = st.number_input(f"Inclinação (%) - Fase {i+1}", value=0.0, key=f"i_{i}") / 100
-        c = st.number_input(f"Comprimento do Veículo (m) - Fase {i+1}", value=12.0, key=f"c_{i}")
+        d2 = st.number_input(f"Extensão da trajetória (m) - Fase {i+1}", value=24, min_value=1, step=1, key=f"d2_{i}")
+        v = st.number_input(f"Velocidade (km/h) - Fase {i+1}", value=40, min_value=1, step=1, key=f"v_{i}")
+        aad = st.number_input(f"Máx. Taxa de Frenagem (m/s²) - Fase {i+1}", value=3, min_value=1, step=1, key=f"aad_{i}")
+        tr = st.number_input(f"Tempo de Reação (s) - Fase {i+1}", value=1, min_value=1, step=1, key=f"tr_{i}")
+        i_slope = st.number_input(f"Inclinação (%) - Fase {i+1}", value=0, min_value=-30, max_value=30, step=1, key=f"i_{i}") / 100
+        c = st.number_input(f"Comprimento do Veículo (m) - Fase {i+1}", value=12, min_value=1, step=1, key=f"c_{i}")
         travessia = st.checkbox("Travessia de Pedestres no estágio subsequente?", key=f"ped_{i}")
 
         if st.button(f"Calcular Fase {i+1}", key=f"calc_{i}"):
@@ -124,7 +124,8 @@ for i in range(num_fases):
             st.success(
                 f"Fase {i+1}: Amarelo = {res['amarelo']}s | Vermelho = {res['vermelho']}s | Total = {res['total']}s")
             fases.append(res)
-if st.button("Calcular Todas as Fases"):
+
+if st.button("Calcular Todas as Fases", key="btn_fases"):
     fases = []
     tp_total = 0
 
@@ -136,7 +137,8 @@ if st.button("Calcular Todas as Fases"):
             st.session_state[f"tr_{i}"],
             st.session_state[f"i_{i}"],
             st.session_state[f"c_{i}"],
-            st.session_state[f"ped_{i}"],)
+            st.session_state[f"ped_{i}"],
+        )
         fases.append({
             "Fase": f"Fase {i+1}",
             "Tempo de Amarelo (s)": res["amarelo"],
@@ -147,15 +149,14 @@ if st.button("Calcular Todas as Fases"):
 
     st.session_state["tp_total"] = tp_total
     st.session_state["df_fases"] = pd.DataFrame(fases)
-
     st.dataframe(st.session_state["df_fases"])
-    st.info(f"**Tempo Perdido Total (Tp): {tp_total:.1f} s**")
+    st.info(f"**Tempo Perdido Total (Tp): {tp_total:.0f} s**")
 
 # -------------------------------------------------------------
 st.divider()
 st.header("Método de Webster")
 
-tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=float(st.session_state.get("tp_total", 9)))
+tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=int(st.session_state.get("tp_total", 9)), min_value=0, step=1)
 
 fluxos = []
 saturacoes = []
@@ -163,10 +164,10 @@ saturacoes = []
 cols = st.columns(2)
 for i in range(num_fases):
     with cols[0]:
-        fluxo = st.number_input(f"Fluxo de Veículos - Fase {i+1} (vph)", min_value=0, value=100, key=f"fluxo_{i}")
+        fluxo = st.number_input(f"Fluxo de Veículos - Fase {i+1} (vph)", min_value=0, value=100, step=1, key=f"fluxo_{i}")
         fluxos.append(fluxo)
     with cols[1]:
-        sat = st.number_input(f"Fluxo de Saturação - Fase {i+1} (vph)", min_value=1, value=1800, key=f"sat_{i}")
+        sat = st.number_input(f"Fluxo de Saturação - Fase {i+1} (vph)", min_value=1, value=1800, step=1, key=f"sat_{i}")
         saturacoes.append(sat)
 
 if st.button("Calcular Ciclo Ótimo (Webster)", key="btn_webster"):
@@ -176,22 +177,20 @@ if st.button("Calcular Ciclo Ótimo (Webster)", key="btn_webster"):
         st.session_state["fluxos"] = fluxos
         st.session_state["saturacoes"] = saturacoes
 
-        st.success(f"**Ciclo Ótimo: {tc:.1f} s**")
+        st.success(f"**Ciclo Ótimo: {int(tc)} s**")
         st.write(f"Σyi = {soma_yi:.3f}")
         st.write(f"yi = {', '.join([f'{y:.3f}' for y in yi])}")
     except Exception as e:
         st.error(str(e))
 
 # -------------------------------------------------------------
-# -------------------------------------------------------------
 st.divider()
 st.header("Tempo Verde Efetivo")
 
-tc_default = st.session_state.get("tc", 60.0)
-tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=tc_default, min_value=1.0)
-tp_input = st.number_input("Tempo Perdido (Tp) [s]", value=int(tp))
+tc_default = int(st.session_state.get("tc", 60))
+tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=tc_default, min_value=1, step=1)
+tp_input = st.number_input("Tempo Perdido (Tp) [s]", value=int(tp), min_value=0, step=1)
 
-# ⬇️ O seletor vem ANTES do botão
 metodo_recalc = st.radio(
     "Método de Reprogramação (quando houver verde < 12s):",
     ["Método 1 (proporcional)", "Método 2 (graus de saturação fixos)"],
@@ -199,7 +198,6 @@ metodo_recalc = st.radio(
     key="radio_metodo"
 )
 
-# ⬇️ TODO o cálculo fica dentro deste botão
 if st.button("Calcular Tempos Verdes", key="btn_verde"):
     fluxos = st.session_state.get("fluxos", [])
     saturacoes = st.session_state.get("saturacoes", [])
@@ -208,14 +206,12 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
         st.error("⚠️ Você precisa calcular o Método de Webster primeiro para definir os fluxos.")
     else:
         try:
-            # cálculo normal de tempos verdes
             tempos, yi, soma_yi = tempo_verde(tc_input, tp_input, fluxos, saturacoes)
             df_verde = pd.DataFrame({
                 "Fase": [f"Fase {i+1}" for i in range(len(tempos))],
                 "Tempo Verde Efetivo (s)": tempos
             })
 
-            # --- Reprogramação automática (só roda se 'tempos' existe) ---
             verde_minimo = 12
             if any(t < verde_minimo for t in tempos):
                 st.warning(f"⚠️ Foi detectado tempo verde inferior a {verde_minimo}s. Recalculando...")
@@ -232,7 +228,7 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
                     novos_tempos = [round(novo_teg * pi) for pi in p]
                     st.info(f"🔁 Recalculo Método 1 → Novo ciclo: **{tc_recalc}s**")
 
-                else:  # Método 2
+                else:
                     pj = p[idx_min]
                     tc_recalc = (t_verde_seguro + tp_input) / pj
                     tc_recalc = round(tc_recalc)
@@ -240,25 +236,20 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
                     novos_tempos = [round(novo_teg * pi) for pi in p]
                     st.info(f"🔁 Recalculo Método 2 → Novo ciclo: **{tc_recalc}s**")
 
-                # Atualiza tabela e estado
                 df_verde["Tempo Verde Efetivo (s)"] = novos_tempos
                 st.session_state["tc_recalc"] = tc_recalc
                 st.session_state["tc"] = tc_recalc
 
-            # Mostra resultado
             st.session_state["df_verde"] = df_verde
             st.dataframe(df_verde, use_container_width=True)
 
         except Exception as e:
             st.error(str(e))
 
-
-
 # -------------------------------------------------------------
 st.divider()
 st.header("Exportar Resultados")
 
-# Monta os dados de exportação
 df_export_parts = []
 
 if "df_fases" in st.session_state:
@@ -275,20 +266,22 @@ resumo = pd.DataFrame({
     "Tipo": ["Resumo"],
     "Tp_Total (s)": [round(st.session_state.get("tp_total", 0), 1)],
     "Ciclo Ótimo Webster (s)": [round(st.session_state.get("tc", 0), 1)],
-    "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")]})
+    "Data Exportação": [datetime.now().strftime("%d/%m/%Y %H:%M")],
+})
 df_export_parts.append(resumo)
 
-if df_export_parts:  # só mostra o botão se houver dados
+if df_export_parts:
     df_export = pd.concat(df_export_parts, ignore_index=True)
     csv = df_export.to_csv(index=False).encode("utf-8")
-
     st.download_button(
         label="Baixar Resultados em CSV",
         data=csv,
         file_name=f"calculadora_semaforo_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-        mime="text/csv")
+        mime="text/csv",
+    )
 else:
     st.info("⚠️ Nenhum dado disponível para exportação. Calcule primeiro os entreverdes ou tempos verdes.")
+
 st.markdown(
     """
     <hr style="border: 1px solid #1e2d4a; margin-top: 2em;">
@@ -297,7 +290,9 @@ st.markdown(
         © 2025 — Todos os direitos reservados.
     </div>
     """,
-    unsafe_allow_html=True)
+    unsafe_allow_html=True,
+)
+
 
 
 
