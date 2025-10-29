@@ -212,46 +212,40 @@ if st.button("Calcular Tempos Verdes"):
         except Exception as e:
             st.error(str(e))
 
+
 # -------------------------------------------------------------
-if st.button("Calcular Tempos Verdes", key="btn_verde"):
-    fluxos = st.session_state.get("fluxos", [])
-    saturacoes = st.session_state.get("saturacoes", [])
+# --- Reprogramação automática se verde < 12s ---
+verde_minimo = 12
+if any(t < verde_minimo for t in tempos):
+    st.warning(f"⚠️ Foi detectado tempo verde inferior a {verde_minimo}s. Recalculando...")
 
-    if not fluxos or not saturacoes:
-        st.error("⚠️ Você precisa calcular o Método de Webster primeiro para definir os fluxos.")
+    idx_min = tempos.index(min(tempos))
+    t_verde_seguro = verde_minimo
+    soma_yi = sum([v/s for v, s in zip(fluxos, saturacoes)])
+    p = [ (v/s) / soma_yi for v, s in zip(fluxos, saturacoes) ]  # frações de verde
+
+    if metodo_recalc == "Método 1 (proporcional)":
+        # --- MODO ANTIGO ---
+        tc_recalc = (t_verde_seguro / tempos[idx_min]) * tc_input
+        tc_recalc = round(tc_recalc)
+        novo_teg = tc_recalc - tp_input
+        novos_tempos = [round(novo_teg * pi) for pi in p]
+        st.info(f"🔁 Recalculo Método 1 → Novo ciclo: **{tc_recalc}s**")
+
     else:
-        try:
-            tempos, yi, soma_yi = tempo_verde(tc_input, tp_input, fluxos, saturacoes)
-            df_verde = pd.DataFrame({
-                "Fase": [f"Fase {i+1}" for i in range(len(tempos))],
-                "Tempo Verde Efetivo (s)": tempos
-            })
+        # --- MÉTODO 2 (graus de saturação fixos) ---
+        pj = p[idx_min]
+        tc_recalc = (t_verde_seguro + tp_input) / pj
+        tc_recalc = round(tc_recalc)
+        novo_teg = tc_recalc - tp_input
+        novos_tempos = [round(novo_teg * pi) for pi in p]
+        st.info(f"🔁 Recalculo Método 2 → Novo ciclo: **{tc_recalc}s**")
 
-            # --- Reprogramação automática se verde < 12s ---
-            verde_minimo = 12
-            if any(t < verde_minimo for t in tempos):
-                st.warning("⚠️ Foi detectado tempo verde inferior a 12s. Recalculando o ciclo (Método 1 simplificado)...")
+    # atualiza tabela e estado
+    df_verde["Tempo Verde Efetivo (s)"] = novos_tempos
+    st.session_state["tc_recalc"] = tc_recalc
+    st.session_state["tc"] = tc_recalc
 
-                idx_min = tempos.index(min(tempos))
-                t_verde_seguro = verde_minimo
-
-                tc_recalc = ((t_verde_seguro / tempos[idx_min]) * tc_input)
-                tc_recalc = round(tc_recalc)
-                st.session_state["tc_recalc"] = tc_recalc
-                st.session_state["tc"] = tc_recalc  # atualiza valor do ciclo no estado
-
-                novo_teg = tc_recalc - tp_input
-                soma_yi = sum([v/s for v, s in zip(fluxos, saturacoes)])
-                novos_tempos = [round(novo_teg * ((v/s)/soma_yi)) for v, s in zip(fluxos, saturacoes)]
-
-                df_verde["Tempo Verde Efetivo (s)"] = novos_tempos
-                st.info(f"🔁 Ciclo recalculado: **{tc_recalc}s** (substitui o valor anterior)")
-
-            st.session_state["df_verde"] = df_verde
-            st.dataframe(df_verde, use_container_width=True)
-
-        except Exception as e:
-            st.error(str(e))
 
 # -------------------------------------------------------------
 st.divider()
@@ -297,6 +291,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
