@@ -206,12 +206,17 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
         st.error("⚠️ Você precisa calcular o Método de Webster primeiro para definir os fluxos.")
     else:
         try:
+            # --- Cálculo normal do tempo verde efetivo ---
             tempos, yi, soma_yi = tempo_verde(tc_input, tp_input, fluxos, saturacoes)
             df_verde = pd.DataFrame({
                 "Fase": [f"Fase {i+1}" for i in range(len(tempos))],
                 "Tempo Verde Efetivo (s)": tempos
             })
 
+            st.subheader("🟩 Tempos Verdes Efetivos (Cálculo Original)")
+            st.dataframe(df_verde, use_container_width=True)
+
+            # --- Verifica se há verdes abaixo de 12s ---
             verde_minimo = 12
             if any(t < verde_minimo for t in tempos):
                 st.warning(f"⚠️ Foi detectado tempo verde inferior a {verde_minimo}s. Recalculando...")
@@ -228,7 +233,7 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
                     novos_tempos = [round(novo_teg * pi) for pi in p]
                     st.info(f"🔁 Recalculo Método 1 → Novo ciclo: **{tc_recalc}s**")
 
-                else:
+                else:  # Método 2
                     pj = p[idx_min]
                     tc_recalc = (t_verde_seguro + tp_input) / pj
                     tc_recalc = round(tc_recalc)
@@ -236,16 +241,26 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
                     novos_tempos = [round(novo_teg * pi) for pi in p]
                     st.info(f"🔁 Recalculo Método 2 → Novo ciclo: **{tc_recalc}s**")
 
-                df_verde["Tempo Verde Efetivo (s)"] = novos_tempos
+                # Exibe a nova tabela comparativa
+                df_verde_recalc = pd.DataFrame({
+                    "Fase": [f"Fase {i+1}" for i in range(len(novos_tempos))],
+                    "Tempo Verde Recalculado (s)": novos_tempos
+                })
+                st.subheader("🟦 Tempos Verdes Após Reprogramação")
+                st.dataframe(df_verde_recalc, use_container_width=True)
+
+                # Salva ambos no estado
+                st.session_state["df_verde"] = df_verde_recalc
                 st.session_state["tc_recalc"] = tc_recalc
                 st.session_state["tc"] = tc_recalc
-
-            st.session_state["df_verde"] = df_verde
-            st.dataframe(df_verde, use_container_width=True)
+            else:
+                st.success("✅ Todos os tempos verdes estão acima do limite de 12 s.")
+                st.session_state["df_verde"] = df_verde
+                st.session_state["tc_recalc"] = tc_input
+                st.session_state["tc"] = tc_input
 
         except Exception as e:
             st.error(str(e))
-
 # -------------------------------------------------------------
 st.divider()
 st.header("Exportar Resultados")
@@ -292,6 +307,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
 
 
 
