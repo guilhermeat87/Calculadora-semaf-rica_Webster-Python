@@ -213,7 +213,7 @@ if st.button("Calcular Tempos Verdes"):
             st.error(str(e))
 
 # -------------------------------------------------------------
-if st.button("Calcular Tempos Verdes", key="btn_verde"):
+if st.button("Recalcular Tempos Verdes (Método 1)", key="btn_verde"):
     fluxos = st.session_state.get("fluxos", [])
     saturacoes = st.session_state.get("saturacoes", [])
 
@@ -297,6 +297,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
