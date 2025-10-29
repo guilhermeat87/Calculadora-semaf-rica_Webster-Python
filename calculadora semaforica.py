@@ -213,6 +213,29 @@ if st.button("Calcular Tempos Verdes"):
             st.error(str(e))
 
 # -------------------------------------------------------------
+verde_minimo = 12
+if any(t < verde_minimo for t in tempos):
+    st.warning("⚠️ Foi detectado tempo verde inferior a 12s. Recalculando o ciclo (Método 1 simplificado)...")
+
+    # identifica a fase com verde insuficiente
+    idx_min = tempos.index(min(tempos))
+    t_verde_seguro = verde_minimo
+
+    # calcula novo ciclo com base na proporção do Webster (Método 1)
+    tc_recalc = ((t_verde_seguro / tempos[idx_min]) * tc_input)
+    tc_recalc = round(tc_recalc)  # aplica arredondamento padrão
+    st.session_state["tc_recalc"] = tc_recalc
+
+    # recalcula novos tempos verdes proporcionais
+    novo_teg = tc_recalc - tp_input
+    soma_yi = sum([v/s for v, s in zip(fluxos, saturacoes)])
+    novos_tempos = [round(novo_teg * ((v/s)/soma_yi)) for v, s in zip(fluxos, saturacoes)]
+
+    # substitui na tabela
+    df_verde["Tempo Verde Efetivo (s)"] = novos_tempos
+    st.info(f"🔁 Ciclo recalculado: **{tc_recalc}s** (substitui o valor anterior)")
+
+# -------------------------------------------------------------
 st.divider()
 st.header("Exportar Resultados")
 
@@ -256,6 +279,7 @@ st.markdown(
     </div>
     """,
     unsafe_allow_html=True)
+
 
 
 
