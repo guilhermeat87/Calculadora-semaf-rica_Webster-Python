@@ -217,50 +217,39 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
             st.dataframe(df_verde, use_container_width=True)
 
             # --- Verifica se há verdes abaixo de 12s ---
-            verde_minimo = 12
-            if any(t < verde_minimo for t in tempos):
-                st.warning(f"⚠️ Foi detectado tempo verde inferior a {verde_minimo}s. Recalculando...")
+verde_minimo = 12
+if any(t < verde_minimo for t in tempos):
+    st.warning(f"⚠️ Foi detectado tempo verde inferior a {verde_minimo}s. Aplicando reprogramação proporcional...")
 
-                idx_min = tempos.index(min(tempos))
-                t_verde_seguro = verde_minimo
-                soma_yi = sum([v/s for v, s in zip(fluxos, saturacoes)])
-                p = [(v/s) / soma_yi for v, s in zip(fluxos, saturacoes)]
+    # Índice e valor da fase crítica (menor tempo)
+    idx_min = int(min(range(len(tempos)), key=lambda k: tempos[k]))
+    t_min = tempos[idx_min]
 
-                if metodo_recalc == "Método 1 (proporcional)":
-                    tc_recalc = (t_verde_seguro / tempos[idx_min]) * tc_input
-                    tc_recalc = round(tc_recalc)
-                    novo_teg = tc_recalc - tp_input
-                    novos_tempos = [round(novo_teg * pi) for pi in p]
-                    st.info(f"🔁 Recalculo Método 1 → Novo ciclo: **{tc_recalc}s**")
+    # Calcula o fator de aumento proporcional
+    fator = verde_minimo / max(t_min, 1)  # evita divisão por zero
 
-                else:  # Método 2
-                    pj = p[idx_min]
-                    tc_recalc = (t_verde_seguro + tp_input) / pj
-                    tc_recalc = round(tc_recalc)
-                    novo_teg = tc_recalc - tp_input
-                    novos_tempos = [round(novo_teg * pi) for pi in p]
-                    st.info(f"🔁 Recalculo Método 2 → Novo ciclo: **{tc_recalc}s**")
+    # Aplica o aumento proporcional em todas as fases
+    novos_tempos = [int(round(t * fator)) for t in tempos]
 
-                # Exibe a nova tabela comparativa
-                df_verde_recalc = pd.DataFrame({
-                    "Fase": [f"Fase {i+1}" for i in range(len(novos_tempos))],
-                    "Tempo Verde Recalculado (s)": novos_tempos
-                })
-                st.subheader("🟦 Tempos Verdes Após Reprogramação")
-                st.dataframe(df_verde_recalc, use_container_width=True)
+    # Novo ciclo proporcional = soma dos verdes + tempo perdido
+    tc_recalc = sum(novos_tempos) + tp_input
 
-                # Salva ambos no estado
-                st.session_state["df_verde"] = df_verde_recalc
-                st.session_state["tc_recalc"] = tc_recalc
-                st.session_state["tc"] = tc_recalc
-            else:
-                st.success("✅ Todos os tempos verdes estão acima do limite de 12 s.")
-                st.session_state["df_verde"] = df_verde
-                st.session_state["tc_recalc"] = tc_input
-                st.session_state["tc"] = tc_input
+    # Exibe resultados
+    st.info(f"🔁 Reprogramação proporcional aplicada → Fator: {fator:.2f} | Novo ciclo: {tc_recalc}s")
 
-        except Exception as e:
-            st.error(str(e))
+    # Cria tabela comparativa
+    df_verde_recalc = pd.DataFrame({
+        "Fase": [f"Fase {i+1}" for i in range(len(novos_tempos))],
+        "Verde Original (s)": tempos,
+        "Verde Reprogramado (s)": novos_tempos
+    })
+
+    st.subheader("🟦 Comparativo: Verde Original × Verde Reprogramado (Proporcional)")
+    st.dataframe(df_verde_recalc, use_container_width=True)
+
+    # Salva resultados
+    st.session_state["df_verde"] = df_verde_recalc
+    st.session_state["tc"] = tc_recalc
 # -------------------------------------------------------------
 st.divider()
 st.header("Exportar Resultados")
@@ -307,6 +296,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
 
 
 
