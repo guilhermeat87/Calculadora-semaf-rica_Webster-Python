@@ -191,13 +191,6 @@ tc_default = int(st.session_state.get("tc", 60))
 tc_input = st.number_input("Tempo de Ciclo (tc) [s]", value=tc_default, min_value=1, step=1)
 tp_input = st.number_input("Tempo Perdido (Tp) [s]", value=int(tp), min_value=0, step=1)
 
-metodo_recalc = st.radio(
-    "Método de Reprogramação (quando houver verde < 12s):",
-    ["Método 1 (proporcional)", "Método 2 (graus de saturação fixos)"],
-    horizontal=True,
-    key="radio_metodo"
-)
-
 if st.button("Calcular Tempos Verdes", key="btn_verde"):
     fluxos = st.session_state.get("fluxos", [])
     saturacoes = st.session_state.get("saturacoes", [])
@@ -217,39 +210,48 @@ if st.button("Calcular Tempos Verdes", key="btn_verde"):
             st.dataframe(df_verde, use_container_width=True)
 
             # --- Verifica se há verdes abaixo de 12s ---
-verde_minimo = 12
-if any(t < verde_minimo for t in tempos):
-    st.warning(f"⚠️ Foi detectado tempo verde inferior a {verde_minimo}s. Aplicando reprogramação proporcional...")
+            verde_minimo = 12
+            if any(t < verde_minimo for t in tempos):
+                st.warning(f"⚠️ Foi detectado tempo verde inferior a {verde_minimo}s. Aplicando reprogramação proporcional...")
 
-    # Índice e valor da fase crítica (menor tempo)
-    idx_min = int(min(range(len(tempos)), key=lambda k: tempos[k]))
-    t_min = tempos[idx_min]
+                # Índice e valor da fase crítica (menor tempo)
+                idx_min = int(min(range(len(tempos)), key=lambda k: tempos[k]))
+                t_min = tempos[idx_min]
 
-    # Calcula o fator de aumento proporcional
-    fator = verde_minimo / max(t_min, 1)  # evita divisão por zero
+                # Calcula o fator de aumento proporcional
+                fator = verde_minimo / max(t_min, 1)  # evita divisão por zero
 
-    # Aplica o aumento proporcional em todas as fases
-    novos_tempos = [int(round(t * fator)) for t in tempos]
+                # Aplica o aumento proporcional em todas as fases
+                novos_tempos = [int(round(t * fator)) for t in tempos]
 
-    # Novo ciclo proporcional = soma dos verdes + tempo perdido
-    tc_recalc = sum(novos_tempos) + tp_input
+                # Novo ciclo proporcional = soma dos verdes + tempo perdido
+                tc_recalc = sum(novos_tempos) + tp_input
 
-    # Exibe resultados
-    st.info(f"🔁 Reprogramação proporcional aplicada → Fator: {fator:.2f} | Novo ciclo: {tc_recalc}s")
+                # Exibe resultados
+                st.info(f"🔁 Reprogramação proporcional aplicada → Fator: {fator:.2f} | Novo ciclo: {tc_recalc}s")
 
-    # Cria tabela comparativa
-    df_verde_recalc = pd.DataFrame({
-        "Fase": [f"Fase {i+1}" for i in range(len(novos_tempos))],
-        "Verde Original (s)": tempos,
-        "Verde Reprogramado (s)": novos_tempos
-    })
+                # Cria tabela comparativa
+                df_verde_recalc = pd.DataFrame({
+                    "Fase": [f"Fase {i+1}" for i in range(len(novos_tempos))],
+                    "Verde Original (s)": tempos,
+                    "Verde Reprogramado (s)": novos_tempos
+                })
 
-    st.subheader("🟦 Comparativo: Verde Original × Verde Reprogramado (Proporcional)")
-    st.dataframe(df_verde_recalc, use_container_width=True)
+                st.subheader("🟦 Comparativo: Verde Original × Verde Reprogramado (Proporcional)")
+                st.dataframe(df_verde_recalc, use_container_width=True)
 
-    # Salva resultados
-    st.session_state["df_verde"] = df_verde_recalc
-    st.session_state["tc"] = tc_recalc
+                # Salva resultados
+                st.session_state["df_verde"] = df_verde_recalc
+                st.session_state["tc"] = tc_recalc
+
+            else:
+                st.success(f"✅ Todos os tempos verdes ≥ {verde_minimo}s.")
+                st.session_state["df_verde"] = df_verde
+                st.session_state["tc"] = tc_input
+
+        except Exception as e:
+            st.error(str(e))
+
 # -------------------------------------------------------------
 st.divider()
 st.header("Exportar Resultados")
@@ -296,6 +298,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
 
 
 
