@@ -154,7 +154,7 @@ if st.button("Calcular Todas as Fases", key="btn_fases"):
 
 # -------------------------------------------------------------
 st.divider()
-st.header("Método de Webster")
+st.header("Cálculo do Ciclo Semafórico")
 
 tp = st.number_input("Tempo Perdido Total (Tp) [s]", value=int(st.session_state.get("tp_total", 9)), min_value=0, step=1)
 
@@ -170,16 +170,83 @@ for i in range(num_fases):
         sat = st.number_input(f"Fluxo de Saturação - Fase {i+1} (vph)", min_value=1, value=1800, step=1, key=f"sat_{i}")
         saturacoes.append(sat)
 
-if st.button("Calcular Ciclo Ótimo (Webster)", key="btn_webster"):
+# Seleção de método em um único seletor
+metodo_ciclo = st.radio(
+    "Selecione o método de cálculo do ciclo:",
+    [
+        "Webster",
+        "Grau de Saturação Máximo",
+        "Reprogramação Proporcional"
+    ],
+    horizontal=True,
+    key="radio_metodo_ciclo"
+)
+
+if st.button("Calcular Ciclo", key="btn_ciclo"):
     try:
-        tc, yi, soma_yi = webster(tp, fluxos, saturacoes)
+        yi = [v / s for v, s in zip(fluxos, saturacoes)]
+        soma_yi = sum(yi)
+
+        # -----------------------------------------------------
+        # 1) MÉTODO WEBSTER
+        # -----------------------------------------------------
+        if metodo_ciclo == "Webster":
+            if soma_yi >= 1:
+                raise ValueError("Σyi deve ser menor que 1 para Webster.")
+            tc = ((1.5 * tp) + 5) / (1 - soma_yi)
+            tc = int(round(tc))
+            metodo_label = "Webster"
+
+        # -----------------------------------------------------
+        # 2) MÉTODO DO GRAU DE SATURAÇÃO MÁXIMO (MBST)
+        # -----------------------------------------------------
+        elif metodo_ciclo == "Grau de Saturação Máximo":
+            st.info("Insira o grau de saturação máximo desejado para cada fase:")
+            xmax = []
+            for i in range(num_fases):
+                xm_i = st.number_input(
+                    f"Grau de Saturação Máximo da Fase {i+1} (ex: 0.85)",
+                    min_value=0.70, max_value=0.99, value=0.90, step=0.01,
+                    key=f"xmax_{i}"
+                )
+                xmax.append(xm_i)
+
+            p = [yi[i] / xmax[i] for i in range(num_fases)]
+            soma_p = sum(p)
+
+            if soma_p >= 1:
+                raise ValueError("Somatório p ≥ 1 — impossível calcular ciclo.")
+
+            tc = tp / (1 - soma_p)
+            tc = int(round(tc))
+            metodo_label = "Grau de Saturação Máximo"
+
+        # -----------------------------------------------------
+        # 3) REPROGRAMAÇÃO PROPORCIONAL
+        # -----------------------------------------------------
+        else:
+            if "tc" not in st.session_state:
+                raise ValueError("Calcule o ciclo por Webster antes da reprogramação proporcional.")
+
+            tc0 = st.session_state["tc"]
+            tempos0, yi, soma_yi = tempo_verde(tc0, tp, fluxos, saturacoes)
+
+            verde_minimo = 12
+            t_min = min(tempos0)
+            fator = verde_minimo / max(t_min, 1)
+            novos_tempos = [int(round(t * fator)) for t in tempos0]
+            tc = sum(novos_tempos) + tp
+            tc = int(tc)
+            metodo_label = "Reprogramação Proporcional"
+
+        # -----------------------------------------------------
+        # RESULTADO FINAL
+        # -----------------------------------------------------
+        st.success(f"**Ciclo calculado ({metodo_label}): {tc} s**")
         st.session_state["tc"] = tc
         st.session_state["fluxos"] = fluxos
         st.session_state["saturacoes"] = saturacoes
 
-        st.success(f"**Ciclo Ótimo: {int(tc)} s**")
-        st.write(f"Σyi = {soma_yi:.3f}")
-        st.write(f"yi = {', '.join([f'{y:.3f}' for y in yi])}")
     except Exception as e:
         st.error(str(e))
 
@@ -298,6 +365,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
 
 
 
